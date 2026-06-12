@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AccuHit 圖片裁切工具</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; }
+
+  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; gap: 16px; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .header-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  header h1 { font-size: 16px; font-weight: 700; }
+  header .subtitle { font-size: 12px; color: #aaa; }
+  @media (max-width: 900px) { header .subtitle { display: none; } }
+
+  .header-controls { display: none; align-items: center; gap: 10px; margin-left: auto; flex-wrap: nowrap; padding-right: 4px; }
+  .header-controls.visible { display: flex; }
+
+  .hdr-fmt { display: flex; gap: 4px; }
+  .hdr-fmt-opt {
+    padding: 5px 11px; border-radius: 6px; border: 1.5px solid #e8e8e8;
+    font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+    transition: all .15s; color: #555;
+  }
+  .hdr-fmt-opt:hover { border-color: #0071e3; color: #0071e3; }
+  .hdr-fmt-opt.active { border-color: #0071e3; background: #0071e3; color: #fff; }
+
+  .hdr-quality { display: flex; align-items: center; gap: 6px; }
+  .hdr-quality label { font-size: 12px; color: #888; white-space: nowrap; }
+  .hdr-quality input[type=range] { width: 70px; accent-color: #0071e3; }
+  .hdr-quality span { font-size: 12px; font-weight: 600; color: #0071e3; min-width: 28px; }
+
+  .hdr-divider { width: 1px; height: 24px; background: #e8e8e8; flex-shrink: 0; }
+
+  .hdr-save { padding: 7px 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s; flex-shrink: 0; }
+  .hdr-save:hover { background: #218838; }
+
+  .hdr-reset { font-size: 12px; color: #aaa; cursor: pointer; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+  .hdr-reset:hover { color: #555; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed #c0c0c8;
+    border-radius: 16px;
+    background: #fff;
+    text-align: center;
+    padding: 60px 24px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: #0071e3; background: #f0f6ff; }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 48px; margin-bottom: 12px; }
+  .upload-zone h2 { font-size: 16px; margin-bottom: 6px; }
+  .upload-zone p { font-size: 13px; color: #888; }
+
+  /* Main editor */
+  .editor { display: none; gap: 20px; }
+  .editor.visible { display: grid; grid-template-columns: 1fr 320px; }
+
+  /* Cropper area */
+  .crop-panel { background: #fff; border-radius: 16px; overflow: hidden; }
+  .crop-header { padding: 14px 18px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+  .crop-header h3 { font-size: 14px; font-weight: 600; }
+  .crop-dims { font-size: 12px; color: #888; background: #f5f5f7; padding: 4px 10px; border-radius: 20px; }
+  .crop-canvas { position: relative; background: #1a1a1a; max-height: 540px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .crop-canvas img { max-width: 100%; max-height: 540px; display: block; }
+  .crop-actions { padding: 14px 18px; display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid #f0f0f0; }
+
+  /* Side panel */
+  .side-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .card { background: #fff; border-radius: 16px; padding: 18px; }
+  .card h3 { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+
+  /* Preset list */
+  .preset-list { display: flex; flex-direction: column; gap: 6px; }
+  .preset-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border: 1.5px solid #e8e8e8; border-radius: 10px;
+    cursor: pointer; background: #fff; transition: all .15s; text-align: left;
+    width: 100%;
+  }
+  .preset-btn:hover { border-color: #0071e3; background: #f0f6ff; }
+  .preset-btn.active { border-color: #0071e3; background: #e8f2ff; }
+  .preset-btn .label { font-size: 13px; font-weight: 500; }
+  .preset-btn .size { font-size: 11px; color: #888; margin-top: 2px; }
+  .preset-btn .tag { font-size: 10px; background: #f0f0f5; color: #666; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+  .preset-btn.active .tag { background: #0071e3; color: #fff; }
+
+  /* Custom size */
+  .custom-size { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .custom-size input { flex: 1; padding: 8px 10px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-size: 13px; text-align: center; }
+  .custom-size input:focus { outline: none; border-color: #0071e3; }
+  .custom-size span { color: #888; font-size: 14px; }
+  .apply-custom { width: 100%; margin-top: 8px; }
+
+  /* Output preview */
+  .preview-box { background: #f5f5f7; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 120px; }
+  .preview-box canvas, .preview-box img { max-width: 100%; max-height: 150px; object-fit: contain; }
+
+  .file-info { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.6; }
+  .file-info span { display: block; }
+  .warn { color: #ff6b00; font-weight: 500; }
+
+  /* Buttons */
+  .btn {
+    padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    border: none; cursor: pointer; transition: all .15s;
+  }
+  .btn-primary { background: #0071e3; color: #fff; }
+  .btn-primary:hover { background: #0065cc; }
+  .btn-secondary { background: #f0f0f5; color: #333; }
+  .btn-secondary:hover { background: #e0e0e8; }
+  .btn-success { background: #28a745; color: #fff; width: 100%; padding: 12px; font-size: 14px; border-radius: 10px; }
+  .btn-success:hover { background: #218838; }
+  .btn-danger { background: #fff0f0; color: #d00; border: 1.5px solid #fcc; }
+  .btn-danger:hover { background: #ffe0e0; }
+  .btn-icon { padding: 8px 12px; font-size: 16px; }
+
+  /* Format selector */
+  .format-row { display: flex; gap: 8px; }
+  .format-opt { flex: 1; text-align: center; padding: 8px; border: 1.5px solid #e8e8e8; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all .15s; }
+  .format-opt:hover { border-color: #0071e3; }
+  .format-opt.active { border-color: #0071e3; background: #e8f2ff; color: #0071e3; }
+
+  /* Quality slider */
+  .quality-row { display: flex; align-items: center; gap: 10px; }
+  .quality-row input[type=range] { flex: 1; accent-color: #0071e3; }
+  .quality-val { font-size: 13px; font-weight: 600; color: #0071e3; min-width: 32px; text-align: right; }
+
+  /* Quick picks */
+  .quick-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #f0f0f0; }
+  .quick-pick {
+    padding: 6px 13px; border-radius: 20px; border: 1.5px solid #e8e8e8;
+    font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+    transition: all .15s; color: #444; white-space: nowrap;
+  }
+  .quick-pick:hover { border-color: #0071e3; color: #0071e3; background: #f0f6ff; }
+  .quick-pick.active { border-color: #0071e3; background: #0071e3; color: #fff; }
+
+  /* Reset */
+  .reset-bar { text-align: center; margin-top: 4px; }
+  .reset-bar a { font-size: 13px; color: #888; cursor: pointer; text-decoration: underline; }
+
+  @media (max-width: 700px) {
+    .editor.visible { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#0071e3"/><path d="M6 9h12M6 12h8M6 15h10" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <h1>AccuHit 圖片裁切工具</h1>
+    <span class="subtitle">支援一番賞、刮刮樂、群發訊息等常用尺寸</span>
+  </div>
+  <div class="header-controls" id="headerControls">
+    <div class="hdr-fmt">
+      <div class="hdr-fmt-opt active" data-fmt="jpeg" onclick="selectFormat(this)">JPG</div>
+      <div class="hdr-fmt-opt" data-fmt="png" onclick="selectFormat(this)">PNG</div>
+      <div class="hdr-fmt-opt" data-fmt="webp" onclick="selectFormat(this)">WEBP</div>
+    </div>
+    <div class="hdr-quality" id="hdrQualityRow">
+      <label>品質</label>
+      <input type="range" id="qualitySlider" min="1" max="100" value="90" oninput="updateQuality(this)">
+      <span id="qualityVal">90%</span>
+    </div>
+    <div class="hdr-divider"></div>
+    <button class="hdr-save" onclick="downloadImage()">⬇ 儲存圖片</button>
+    <a class="hdr-reset" onclick="resetAll()">重新上傳</a>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Upload -->
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept="image/*">
+    <div class="upload-icon">🖼️</div>
+    <h2>點擊或拖曳圖片到這裡</h2>
+    <p>支援 JPG、PNG、WEBP 格式</p>
+  </div>
+
+  <!-- Editor -->
+  <div class="editor" id="editor">
+
+    <!-- Left: Cropper -->
+    <div class="crop-panel">
+      <div class="crop-header">
+        <h3 id="selectedLabel">請選擇尺寸</h3>
+        <span class="crop-dims" id="cropDims">—</span>
+      </div>
+      <div class="crop-canvas">
+        <img id="cropImage" src="" alt="">
+      </div>
+      <div class="crop-actions">
+        <button class="btn btn-secondary btn-icon" title="向左旋轉" onclick="rotateLeft()">↺</button>
+        <button class="btn btn-secondary btn-icon" title="向右旋轉" onclick="rotateRight()">↻</button>
+        <button class="btn btn-secondary btn-icon" title="水平翻轉" onclick="flipX()">⇄</button>
+        <button class="btn btn-secondary btn-icon" title="垂直翻轉" onclick="flipY()">⇅</button>
+        <button class="btn btn-secondary" onclick="resetCrop()">重置裁切</button>
+        <button class="btn btn-primary" onclick="generatePreview()" style="margin-left:auto">套用裁切 →</button>
+      </div>
+    </div>
+
+    <!-- Right: Controls -->
+    <div class="side-panel">
+
+      <!-- Presets -->
+      <div class="card">
+        <h3>常用尺寸</h3>
+        <div class="quick-picks" id="quickPicks"></div>
+        <div class="preset-list" id="presetList"></div>
+        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #f0f0f0;">
+          <div style="font-size:12px;color:#888;margin-bottom:6px;">自訂尺寸</div>
+          <div class="custom-size">
+            <input type="number" id="customW" placeholder="寬 px" min="1">
+            <span>×</span>
+            <input type="number" id="customH" placeholder="高 px" min="1">
+          </div>
+          <button class="btn btn-secondary apply-custom" onclick="applyCustomSize()">套用自訂</button>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="card">
+        <h3>輸出預覽</h3>
+        <div class="preview-box" id="previewBox">
+          <span style="color:#ccc;font-size:13px">套用裁切後顯示</span>
+        </div>
+        <div class="file-info" id="fileInfo"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<script>
+// ── Quick picks ────────────────────────────────────────────────────────────
+const QUICK_PICKS = [
+  { label: '4:3',        aspectW: 4,    aspectH: 3,    w: null, h: null },
+  { label: '16:9',       aspectW: 16,   aspectH: 9,    w: null, h: null },
+  { label: '800×400',    aspectW: null, aspectH: null, w: 800,  h: 400  },
+  { label: '1080×1080',  aspectW: null, aspectH: null, w: 1080, h: 1080 },
+  { label: '1920×1080',  aspectW: null, aspectH: null, w: 1920, h: 1080 },
+];
+
+// ── Presets ────────────────────────────────────────────────────────────────
+const PRESETS = [
+  { label: '一番賞 背景圖',    w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
+  { label: '一番賞 封面圖',    w: 800,  h: 480,  tag: '遊戲模組', maxMB: 10 },
+  { label: '刮刮樂 素材',      w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
+  { label: '拉霸/轉盤 獎品',   w: 400,  h: 300,  tag: '遊戲模組', maxMB: 1, aspectW: 4, aspectH: 3 },
+  { label: '簽到 活動圖片',    w: 800,  h: 400,  tag: '簽到模組', maxMB: 9, aspectW: 2, aspectH: 1 },
+  { label: '群發 進階圖片',    w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
+  { label: '群發 連續圖片',    w: 1040, h: 1040, tag: '群發訊息', maxMB: 10 },
+  { label: 'LINE 輪播圖文',    w: 1040, h: 1040, tag: '群發訊息', maxMB: 1 },
+  { label: '觸發卡片',         w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let cropper = null;
+let currentPreset = null;
+let outputFormat = 'jpeg';
+let outputQuality = 0.9;
+let previewDataURL = null;
+let originalFileName = 'image';
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderQuickPicks();
+  renderPresets();
+  setupUpload();
+});
+
+function renderQuickPicks() {
+  const container = document.getElementById('quickPicks');
+  QUICK_PICKS.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-pick';
+    btn.textContent = p.label;
+    btn.dataset.idx = i;
+    btn.onclick = () => applyQuickPick(i, btn);
+    container.appendChild(btn);
+  });
+}
+
+function applyQuickPick(idx, btnEl) {
+  // deactivate all quick + preset buttons
+  document.querySelectorAll('.quick-pick').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+
+  const p = QUICK_PICKS[idx];
+  if (p.w && p.h) {
+    // fixed pixel size
+    currentPreset = { label: p.label, w: p.w, h: p.h, maxMB: null };
+    document.getElementById('customW').value = p.w;
+    document.getElementById('customH').value = p.h;
+    document.getElementById('selectedLabel').textContent = p.label;
+    updateDimsLabel(p.w, p.h);
+    setCropperAspect(p.w, p.h);
+  } else {
+    // aspect ratio only — use 1600px wide as default output width
+    const ratio = p.aspectW / p.aspectH;
+    const w = 1600, h = Math.round(1600 / ratio);
+    currentPreset = { label: p.label, w, h, maxMB: null };
+    document.getElementById('customW').value = w;
+    document.getElementById('customH').value = h;
+    document.getElementById('selectedLabel').textContent = `${p.label} (${w}×${h})`;
+    updateDimsLabel(w, h);
+    if (cropper) cropper.setAspectRatio(ratio);
+  }
+}
+
+function renderPresets() {
+  const list = document.getElementById('presetList');
+  PRESETS.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.innerHTML = `
+      <div>
+        <div class="label">${p.label}</div>
+        <div class="size">${p.w} × ${p.h} px &nbsp;|&nbsp; 限 ${p.maxMB}MB</div>
+      </div>
+      <span class="tag">${p.tag}</span>`;
+    btn.onclick = () => applyPreset(i, btn);
+    list.appendChild(btn);
+  });
+}
+
+function setupUpload() {
+  const zone = document.getElementById('uploadZone');
+  const input = document.getElementById('fileInput');
+
+  input.addEventListener('change', e => loadFile(e.target.files[0]));
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) loadFile(f);
+  });
+}
+
+function loadFile(file) {
+  if (!file) return;
+  originalFileName = file.name.replace(/\.[^.]+$/, '');
+  const url = URL.createObjectURL(file);
+  document.getElementById('cropImage').src = url;
+
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('editor').classList.add('visible');
+  document.getElementById('headerControls').classList.add('visible');
+
+  // Init cropper (free aspect)
+  if (cropper) { cropper.destroy(); cropper = null; }
+  const img = document.getElementById('cropImage');
+  img.onload = () => {
+    cropper = new Cropper(img, {
+      viewMode: 1,
+      dragMode: 'move',
+      autoCropArea: 1,
+      restore: false,
+      guides: true,
+      center: true,
+      highlight: false,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      toggleDragModeOnDblclick: false,
+      crop(e) { updateDimsLabel(Math.round(e.detail.width), Math.round(e.detail.height)); }
+    });
+  };
+}
+
+// ── Preset / custom ────────────────────────────────────────────────────────
+function applyPreset(idx, btnEl) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.quick-pick').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+
+  currentPreset = PRESETS[idx];
+  document.getElementById('selectedLabel').textContent = currentPreset.label;
+  updateDimsLabel(currentPreset.w, currentPreset.h);
+
+  document.getElementById('customW').value = currentPreset.w;
+  document.getElementById('customH').value = currentPreset.h;
+
+  setCropperAspect(currentPreset.w, currentPreset.h);
+}
+
+function applyCustomSize() {
+  const w = parseInt(document.getElementById('customW').value);
+  const h = parseInt(document.getElementById('customH').value);
+  if (!w || !h || w < 1 || h < 1) return alert('請輸入有效的寬高');
+
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  currentPreset = { label: `自訂 ${w}×${h}`, w, h, maxMB: null };
+  document.getElementById('selectedLabel').textContent = currentPreset.label;
+  updateDimsLabel(w, h);
+  setCropperAspect(w, h);
+}
+
+function setCropperAspect(w, h) {
+  if (!cropper) return;
+  cropper.setAspectRatio(w / h);
+  cropper.reset();
+}
+
+function updateDimsLabel(w, h) {
+  document.getElementById('cropDims').textContent = `${w} × ${h} px`;
+}
+
+// ── Cropper controls ───────────────────────────────────────────────────────
+function rotateLeft()  { cropper && cropper.rotate(-90); }
+function rotateRight() { cropper && cropper.rotate(90); }
+let scaleXState = 1, scaleYState = 1;
+function flipX() { scaleXState *= -1; cropper && cropper.scaleX(scaleXState); }
+function flipY() { scaleYState *= -1; cropper && cropper.scaleY(scaleYState); }
+function resetCrop() {
+  scaleXState = 1; scaleYState = 1;
+  cropper && cropper.reset();
+  if (currentPreset) setCropperAspect(currentPreset.w, currentPreset.h);
+}
+
+// ── Preview / download ─────────────────────────────────────────────────────
+function generatePreview() {
+  if (!cropper) return;
+  if (!currentPreset) {
+    const w = parseInt(document.getElementById('customW').value);
+    const h = parseInt(document.getElementById('customH').value);
+    if (!w || !h) return alert('請先選擇尺寸或輸入自訂尺寸');
+    currentPreset = { label: `自訂 ${w}×${h}`, w, h, maxMB: null };
+  }
+
+  const canvas = cropper.getCroppedCanvas({ width: currentPreset.w, height: currentPreset.h, imageSmoothingQuality: 'high' });
+  const mime = outputFormat === 'png' ? 'image/png' : outputFormat === 'webp' ? 'image/webp' : 'image/jpeg';
+  previewDataURL = canvas.toDataURL(mime, outputQuality);
+
+  // Show preview
+  const box = document.getElementById('previewBox');
+  box.innerHTML = `<img src="${previewDataURL}" style="max-width:100%;max-height:150px;object-fit:contain">`;
+
+  // File size estimate
+  const bytes = Math.round((previewDataURL.length - `data:${mime};base64,`.length) * 0.75);
+  const kb = (bytes / 1024).toFixed(0);
+  const mb = (bytes / 1024 / 1024).toFixed(2);
+
+  let warn = '';
+  if (currentPreset.maxMB && bytes > currentPreset.maxMB * 1024 * 1024) {
+    warn = `<span class="warn">⚠ 超過 ${currentPreset.maxMB}MB 限制，建議降低品質或選 JPG</span>`;
+  }
+
+  document.getElementById('fileInfo').innerHTML = `
+    <span>尺寸：${currentPreset.w} × ${currentPreset.h} px</span>
+    <span>大小：約 ${kb < 1024 ? kb + ' KB' : mb + ' MB'}</span>
+    <span>格式：${outputFormat.toUpperCase()}</span>
+    ${warn}`;
+}
+
+function downloadImage() {
+  if (!previewDataURL) { generatePreview(); if (!previewDataURL) return; }
+  const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
+  const a = document.createElement('a');
+  a.href = previewDataURL;
+  a.download = `${originalFileName}_${currentPreset.w}x${currentPreset.h}.${ext}`;
+  a.click();
+}
+
+// ── Format / quality ───────────────────────────────────────────────────────
+function selectFormat(el) {
+  document.querySelectorAll('.hdr-fmt-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  outputFormat = el.dataset.fmt;
+  document.getElementById('hdrQualityRow').style.display = outputFormat === 'png' ? 'none' : 'flex';
+  previewDataURL = null;
+  document.getElementById('previewBox').innerHTML = '<span style="color:#ccc;font-size:13px">套用裁切後顯示</span>';
+  document.getElementById('fileInfo').innerHTML = '';
+}
+
+function updateQuality(el) {
+  outputQuality = el.value / 100;
+  document.getElementById('qualityVal').textContent = el.value + '%';
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+function resetAll() {
+  if (cropper) { cropper.destroy(); cropper = null; }
+  currentPreset = null; previewDataURL = null;
+  document.getElementById('cropImage').src = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('editor').classList.remove('visible');
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('headerControls').classList.remove('visible');
+  document.getElementById('selectedLabel').textContent = '請選擇尺寸';
+  document.getElementById('cropDims').textContent = '—';
+  document.getElementById('previewBox').innerHTML = '<span style="color:#ccc;font-size:13px">套用裁切後顯示</span>';
+  document.getElementById('fileInfo').innerHTML = '';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  scaleXState = 1; scaleYState = 1;
+}
+</script>
+</body>
+</html>
