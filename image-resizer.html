@@ -9,11 +9,15 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; }
 
-  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; gap: 16px; height: 56px; position: sticky; top: 0; z-index: 100; }
+  /* ── Header ── */
+  header {
+    background: #fff; border-bottom: 1px solid #e0e0e0;
+    padding: 0 24px; display: flex; align-items: center; gap: 16px;
+    height: 56px; position: sticky; top: 0; z-index: 100;
+  }
   .header-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   header h1 { font-size: 16px; font-weight: 700; }
   header .subtitle { font-size: 12px; color: #aaa; }
-  @media (max-width: 900px) { header .subtitle { display: none; } }
 
   .header-controls { display: none; align-items: center; gap: 10px; margin-left: auto; flex-wrap: nowrap; padding-right: 4px; }
   .header-controls.visible { display: flex; }
@@ -31,60 +35,80 @@
   .hdr-quality label { font-size: 12px; color: #888; white-space: nowrap; }
   .hdr-quality input[type=range] { width: 70px; accent-color: #0071e3; }
   .hdr-quality span { font-size: 12px; font-weight: 600; color: #0071e3; min-width: 28px; }
-
   .hdr-divider { width: 1px; height: 24px; background: #e8e8e8; flex-shrink: 0; }
-
   .hdr-save { padding: 7px 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s; flex-shrink: 0; }
   .hdr-save:hover { background: #218838; }
-
-  .hdr-reset { font-size: 12px; color: #aaa; cursor: pointer; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+  .hdr-reset { font-size: 12px; color: #aaa; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
   .hdr-reset:hover { color: #555; }
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  @media (max-width: 900px) { header .subtitle { display: none; } }
+
+  /* ── Layout ── */
+  .container { max-width: 1140px; margin: 0 auto; padding: 24px; }
+
+  /* Always 2-column */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ── Left panel (upload or crop) ── */
+  .left-panel { min-height: 400px; }
 
   /* Upload zone */
   .upload-zone {
-    border: 2px dashed #c0c0c8;
-    border-radius: 16px;
-    background: #fff;
-    text-align: center;
-    padding: 60px 24px;
-    cursor: pointer;
-    transition: all .2s;
-    position: relative;
+    border: 2px dashed #c0c0c8; border-radius: 16px; background: #fff;
+    text-align: center; padding: 80px 24px; cursor: pointer;
+    transition: all .2s; position: relative; height: 100%; min-height: 400px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
   .upload-zone:hover, .upload-zone.drag-over { border-color: #0071e3; background: #f0f6ff; }
   .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { font-size: 48px; margin-bottom: 12px; }
-  .upload-zone h2 { font-size: 16px; margin-bottom: 6px; }
-  .upload-zone p { font-size: 13px; color: #888; }
+  .upload-icon { font-size: 52px; margin-bottom: 16px; }
+  .upload-zone h2 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+  .upload-zone p { font-size: 13px; color: #999; }
+  .upload-hint {
+    margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  .upload-hint-tag {
+    font-size: 11px; color: #0071e3; background: #e8f2ff;
+    padding: 4px 10px; border-radius: 20px; font-weight: 500;
+  }
 
-  /* Main editor */
-  .editor { display: none; gap: 20px; }
-  .editor.visible { display: grid; grid-template-columns: 1fr 320px; }
-
-  /* Cropper area */
-  .crop-panel { background: #fff; border-radius: 16px; overflow: hidden; }
+  /* Crop panel */
+  .crop-panel { display: none; background: #fff; border-radius: 16px; overflow: hidden; }
+  .crop-panel.visible { display: block; }
   .crop-header { padding: 14px 18px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
   .crop-header h3 { font-size: 14px; font-weight: 600; }
   .crop-dims { font-size: 12px; color: #888; background: #f5f5f7; padding: 4px 10px; border-radius: 20px; }
-  .crop-canvas { position: relative; background: #1a1a1a; max-height: 540px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .crop-canvas img { max-width: 100%; max-height: 540px; display: block; }
+  .crop-canvas { background: #1a1a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .crop-canvas img { max-width: 100%; display: block; }
   .crop-actions { padding: 14px 18px; display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid #f0f0f0; }
 
-  /* Side panel */
+  /* ── Right / side panel ── */
   .side-panel { display: flex; flex-direction: column; gap: 16px; }
 
   .card { background: #fff; border-radius: 16px; padding: 18px; }
   .card h3 { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+
+  /* Quick picks */
+  .quick-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #f0f0f0; }
+  .quick-pick {
+    padding: 6px 13px; border-radius: 20px; border: 1.5px solid #e8e8e8;
+    font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
+    transition: all .15s; color: #444; white-space: nowrap;
+  }
+  .quick-pick:hover { border-color: #0071e3; color: #0071e3; background: #f0f6ff; }
+  .quick-pick.active { border-color: #0071e3; background: #0071e3; color: #fff; }
 
   /* Preset list */
   .preset-list { display: flex; flex-direction: column; gap: 6px; }
   .preset-btn {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 14px; border: 1.5px solid #e8e8e8; border-radius: 10px;
-    cursor: pointer; background: #fff; transition: all .15s; text-align: left;
-    width: 100%;
+    cursor: pointer; background: #fff; transition: all .15s; text-align: left; width: 100%;
   }
   .preset-btn:hover { border-color: #0071e3; background: #f0f6ff; }
   .preset-btn.active { border-color: #0071e3; background: #e8f2ff; }
@@ -100,56 +124,26 @@
   .custom-size span { color: #888; font-size: 14px; }
   .apply-custom { width: 100%; margin-top: 8px; }
 
-  /* Output preview */
-  .preview-box { background: #f5f5f7; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 120px; }
-  .preview-box canvas, .preview-box img { max-width: 100%; max-height: 150px; object-fit: contain; }
-
-  .file-info { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.6; }
-  .file-info span { display: block; }
-  .warn { color: #ff6b00; font-weight: 500; }
-
   /* Buttons */
-  .btn {
-    padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
-    border: none; cursor: pointer; transition: all .15s;
-  }
+  .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all .15s; }
   .btn-primary { background: #0071e3; color: #fff; }
   .btn-primary:hover { background: #0065cc; }
   .btn-secondary { background: #f0f0f5; color: #333; }
   .btn-secondary:hover { background: #e0e0e8; }
-  .btn-success { background: #28a745; color: #fff; width: 100%; padding: 12px; font-size: 14px; border-radius: 10px; }
-  .btn-success:hover { background: #218838; }
-  .btn-danger { background: #fff0f0; color: #d00; border: 1.5px solid #fcc; }
-  .btn-danger:hover { background: #ffe0e0; }
   .btn-icon { padding: 8px 12px; font-size: 16px; }
 
-  /* Format selector */
-  .format-row { display: flex; gap: 8px; }
-  .format-opt { flex: 1; text-align: center; padding: 8px; border: 1.5px solid #e8e8e8; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all .15s; }
-  .format-opt:hover { border-color: #0071e3; }
-  .format-opt.active { border-color: #0071e3; background: #e8f2ff; color: #0071e3; }
-
-  /* Quality slider */
-  .quality-row { display: flex; align-items: center; gap: 10px; }
-  .quality-row input[type=range] { flex: 1; accent-color: #0071e3; }
-  .quality-val { font-size: 13px; font-weight: 600; color: #0071e3; min-width: 32px; text-align: right; }
-
-  /* Quick picks */
-  .quick-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #f0f0f0; }
-  .quick-pick {
-    padding: 6px 13px; border-radius: 20px; border: 1.5px solid #e8e8e8;
-    font-size: 12px; font-weight: 600; cursor: pointer; background: #fff;
-    transition: all .15s; color: #444; white-space: nowrap;
+  /* Output preview */
+  .preview-box {
+    background: #f5f5f7; border-radius: 10px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; min-height: 100px;
   }
-  .quick-pick:hover { border-color: #0071e3; color: #0071e3; background: #f0f6ff; }
-  .quick-pick.active { border-color: #0071e3; background: #0071e3; color: #fff; }
+  .preview-box img { max-width: 100%; max-height: 140px; object-fit: contain; }
+  .file-info { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.7; }
+  .file-info span { display: block; }
+  .warn { color: #ff6b00; font-weight: 500; }
 
-  /* Reset */
-  .reset-bar { text-align: center; margin-top: 4px; }
-  .reset-bar a { font-size: 13px; color: #888; cursor: pointer; text-decoration: underline; }
-
-  @media (max-width: 700px) {
-    .editor.visible { grid-template-columns: 1fr; }
+  @media (max-width: 600px) {
+    .layout { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -159,7 +153,7 @@
   <div class="header-brand">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#0071e3"/><path d="M6 9h12M6 12h8M6 15h10" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
     <h1>AccuHit 圖片裁切工具</h1>
-    <span class="subtitle">支援一番賞、刮刮樂、群發訊息等常用尺寸</span>
+    <span class="subtitle">上傳圖片 → 選擇尺寸 → 裁切 → 儲存</span>
   </div>
   <div class="header-controls" id="headerControls">
     <div class="hdr-fmt">
@@ -179,41 +173,51 @@
 </header>
 
 <div class="container">
+  <div class="layout">
 
-  <!-- Upload -->
-  <div class="upload-zone" id="uploadZone">
-    <input type="file" id="fileInput" accept="image/*">
-    <div class="upload-icon">🖼️</div>
-    <h2>點擊或拖曳圖片到這裡</h2>
-    <p>支援 JPG、PNG、WEBP 格式</p>
-  </div>
+    <!-- Left: upload zone or cropper -->
+    <div class="left-panel">
 
-  <!-- Editor -->
-  <div class="editor" id="editor">
+      <!-- Upload zone (default) -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*">
+        <div class="upload-icon">🖼️</div>
+        <h2>點擊或拖曳圖片到這裡</h2>
+        <p>支援 JPG、PNG、WEBP 格式</p>
+        <div class="upload-hint">
+          <span class="upload-hint-tag">一番賞</span>
+          <span class="upload-hint-tag">刮刮樂</span>
+          <span class="upload-hint-tag">群發訊息</span>
+          <span class="upload-hint-tag">簽到模組</span>
+          <span class="upload-hint-tag">自訂尺寸</span>
+        </div>
+      </div>
 
-    <!-- Left: Cropper -->
-    <div class="crop-panel">
-      <div class="crop-header">
-        <h3 id="selectedLabel">請選擇尺寸</h3>
-        <span class="crop-dims" id="cropDims">—</span>
+      <!-- Crop panel (after upload) -->
+      <div class="crop-panel" id="cropPanel">
+        <div class="crop-header">
+          <h3 id="selectedLabel">請選擇右側尺寸</h3>
+          <span class="crop-dims" id="cropDims">—</span>
+        </div>
+        <div class="crop-canvas" id="cropCanvas">
+          <img id="cropImage" src="" alt="">
+        </div>
+        <div class="crop-actions">
+          <button class="btn btn-secondary btn-icon" title="向左旋轉" onclick="rotateLeft()">↺</button>
+          <button class="btn btn-secondary btn-icon" title="向右旋轉" onclick="rotateRight()">↻</button>
+          <button class="btn btn-secondary btn-icon" title="水平翻轉" onclick="flipX()">⇄</button>
+          <button class="btn btn-secondary btn-icon" title="垂直翻轉" onclick="flipY()">⇅</button>
+          <button class="btn btn-secondary" onclick="resetCrop()">重置裁切</button>
+          <button class="btn btn-primary" onclick="generatePreview()" style="margin-left:auto">套用裁切 →</button>
+        </div>
       </div>
-      <div class="crop-canvas">
-        <img id="cropImage" src="" alt="">
-      </div>
-      <div class="crop-actions">
-        <button class="btn btn-secondary btn-icon" title="向左旋轉" onclick="rotateLeft()">↺</button>
-        <button class="btn btn-secondary btn-icon" title="向右旋轉" onclick="rotateRight()">↻</button>
-        <button class="btn btn-secondary btn-icon" title="水平翻轉" onclick="flipX()">⇄</button>
-        <button class="btn btn-secondary btn-icon" title="垂直翻轉" onclick="flipY()">⇅</button>
-        <button class="btn btn-secondary" onclick="resetCrop()">重置裁切</button>
-        <button class="btn btn-primary" onclick="generatePreview()" style="margin-left:auto">套用裁切 →</button>
-      </div>
+
     </div>
 
-    <!-- Right: Controls -->
+    <!-- Right: always visible -->
     <div class="side-panel">
 
-      <!-- Presets -->
+      <!-- Size presets -->
       <div class="card">
         <h3>常用尺寸</h3>
         <div class="quick-picks" id="quickPicks"></div>
@@ -229,7 +233,7 @@
         </div>
       </div>
 
-      <!-- Preview -->
+      <!-- Output preview -->
       <div class="card">
         <h3>輸出預覽</h3>
         <div class="preview-box" id="previewBox">
@@ -240,42 +244,38 @@
 
     </div>
   </div>
-
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script>
-// ── Quick picks ────────────────────────────────────────────────────────────
 const QUICK_PICKS = [
-  { label: '4:3',        aspectW: 4,    aspectH: 3,    w: null, h: null },
-  { label: '16:9',       aspectW: 16,   aspectH: 9,    w: null, h: null },
-  { label: '800×400',    aspectW: null, aspectH: null, w: 800,  h: 400  },
-  { label: '1080×1080',  aspectW: null, aspectH: null, w: 1080, h: 1080 },
-  { label: '1920×1080',  aspectW: null, aspectH: null, w: 1920, h: 1080 },
+  { label: '4:3',        aspectW: 4,  aspectH: 3, w: null, h: null },
+  { label: '16:9',       aspectW: 16, aspectH: 9, w: null, h: null },
+  { label: '800×400',    w: 800,  h: 400  },
+  { label: '1080×1080',  w: 1080, h: 1080 },
+  { label: '1920×1080',  w: 1920, h: 1080 },
 ];
 
-// ── Presets ────────────────────────────────────────────────────────────────
 const PRESETS = [
-  { label: '一番賞 背景圖',    w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
-  { label: '一番賞 封面圖',    w: 800,  h: 480,  tag: '遊戲模組', maxMB: 10 },
-  { label: '刮刮樂 素材',      w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
-  { label: '拉霸/轉盤 獎品',   w: 400,  h: 300,  tag: '遊戲模組', maxMB: 1, aspectW: 4, aspectH: 3 },
-  { label: '簽到 活動圖片',    w: 800,  h: 400,  tag: '簽到模組', maxMB: 9, aspectW: 2, aspectH: 1 },
-  { label: '群發 進階圖片',    w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
-  { label: '群發 連續圖片',    w: 1040, h: 1040, tag: '群發訊息', maxMB: 10 },
-  { label: 'LINE 輪播圖文',    w: 1040, h: 1040, tag: '群發訊息', maxMB: 1 },
-  { label: '觸發卡片',         w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
+  { label: '一番賞 背景圖',  w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
+  { label: '一番賞 封面圖',  w: 800,  h: 480,  tag: '遊戲模組', maxMB: 10 },
+  { label: '刮刮樂 素材',    w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
+  { label: '拉霸/轉盤 獎品', w: 400,  h: 300,  tag: '遊戲模組', maxMB: 1  },
+  { label: '簽到 活動圖片',  w: 800,  h: 400,  tag: '簽到模組', maxMB: 9  },
+  { label: '群發 進階圖片',  w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
+  { label: '群發 連續圖片',  w: 1040, h: 1040, tag: '群發訊息', maxMB: 10 },
+  { label: 'LINE 輪播圖文',  w: 1040, h: 1040, tag: '群發訊息', maxMB: 1  },
+  { label: '觸發卡片',       w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
 ];
 
-// ── State ──────────────────────────────────────────────────────────────────
 let cropper = null;
 let currentPreset = null;
 let outputFormat = 'jpeg';
 let outputQuality = 0.9;
 let previewDataURL = null;
 let originalFileName = 'image';
+let scaleXState = 1, scaleYState = 1;
 
-// ── Init ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderQuickPicks();
   renderPresets();
@@ -288,38 +288,9 @@ function renderQuickPicks() {
     const btn = document.createElement('button');
     btn.className = 'quick-pick';
     btn.textContent = p.label;
-    btn.dataset.idx = i;
     btn.onclick = () => applyQuickPick(i, btn);
     container.appendChild(btn);
   });
-}
-
-function applyQuickPick(idx, btnEl) {
-  // deactivate all quick + preset buttons
-  document.querySelectorAll('.quick-pick').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  btnEl.classList.add('active');
-
-  const p = QUICK_PICKS[idx];
-  if (p.w && p.h) {
-    // fixed pixel size
-    currentPreset = { label: p.label, w: p.w, h: p.h, maxMB: null };
-    document.getElementById('customW').value = p.w;
-    document.getElementById('customH').value = p.h;
-    document.getElementById('selectedLabel').textContent = p.label;
-    updateDimsLabel(p.w, p.h);
-    setCropperAspect(p.w, p.h);
-  } else {
-    // aspect ratio only — use 1600px wide as default output width
-    const ratio = p.aspectW / p.aspectH;
-    const w = 1600, h = Math.round(1600 / ratio);
-    currentPreset = { label: p.label, w, h, maxMB: null };
-    document.getElementById('customW').value = w;
-    document.getElementById('customH').value = h;
-    document.getElementById('selectedLabel').textContent = `${p.label} (${w}×${h})`;
-    updateDimsLabel(w, h);
-    if (cropper) cropper.setAspectRatio(ratio);
-  }
 }
 
 function renderPresets() {
@@ -341,14 +312,11 @@ function renderPresets() {
 function setupUpload() {
   const zone = document.getElementById('uploadZone');
   const input = document.getElementById('fileInput');
-
   input.addEventListener('change', e => loadFile(e.target.files[0]));
-
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
   zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
+    e.preventDefault(); zone.classList.remove('drag-over');
     const f = e.dataTransfer.files[0];
     if (f && f.type.startsWith('image/')) loadFile(f);
   });
@@ -358,45 +326,67 @@ function loadFile(file) {
   if (!file) return;
   originalFileName = file.name.replace(/\.[^.]+$/, '');
   const url = URL.createObjectURL(file);
-  document.getElementById('cropImage').src = url;
 
   document.getElementById('uploadZone').style.display = 'none';
-  document.getElementById('editor').classList.add('visible');
+  document.getElementById('cropPanel').classList.add('visible');
   document.getElementById('headerControls').classList.add('visible');
 
-  // Init cropper (free aspect)
   if (cropper) { cropper.destroy(); cropper = null; }
   const img = document.getElementById('cropImage');
+  img.src = url;
   img.onload = () => {
+    // set canvas height to maintain image proportions, capped at 560px
+    const ratio = img.naturalHeight / img.naturalWidth;
+    const canvasH = Math.min(Math.round(img.offsetWidth * ratio), 560);
+    document.getElementById('cropCanvas').style.height = canvasH + 'px';
+
     cropper = new Cropper(img, {
-      viewMode: 1,
-      dragMode: 'move',
-      autoCropArea: 1,
-      restore: false,
-      guides: true,
-      center: true,
-      highlight: false,
-      cropBoxMovable: true,
-      cropBoxResizable: true,
-      toggleDragModeOnDblclick: false,
+      viewMode: 1, dragMode: 'move', autoCropArea: 1,
+      restore: false, guides: true, center: true, highlight: false,
+      cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false,
       crop(e) { updateDimsLabel(Math.round(e.detail.width), Math.round(e.detail.height)); }
     });
+    // re-apply selected size if one was already chosen
+    if (currentPreset) setCropperAspect(currentPreset.w, currentPreset.h);
   };
 }
 
-// ── Preset / custom ────────────────────────────────────────────────────────
-function applyPreset(idx, btnEl) {
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.quick-pick').forEach(b => b.classList.remove('active'));
-  btnEl.classList.add('active');
+// ── Size selection ─────────────────────────────────────────────────────────
+function clearActiveButtons() {
+  document.querySelectorAll('.quick-pick, .preset-btn').forEach(b => b.classList.remove('active'));
+}
 
+function applyQuickPick(idx, btnEl) {
+  clearActiveButtons();
+  btnEl.classList.add('active');
+  const p = QUICK_PICKS[idx];
+  if (p.w && p.h) {
+    currentPreset = { label: p.label, w: p.w, h: p.h, maxMB: null };
+    document.getElementById('customW').value = p.w;
+    document.getElementById('customH').value = p.h;
+    document.getElementById('selectedLabel').textContent = p.label;
+    updateDimsLabel(p.w, p.h);
+    setCropperAspect(p.w, p.h);
+  } else {
+    const ratio = p.aspectW / p.aspectH;
+    const w = 1600, h = Math.round(1600 / ratio);
+    currentPreset = { label: p.label, w, h, maxMB: null };
+    document.getElementById('customW').value = w;
+    document.getElementById('customH').value = h;
+    document.getElementById('selectedLabel').textContent = `${p.label}（${w}×${h}）`;
+    updateDimsLabel(w, h);
+    if (cropper) cropper.setAspectRatio(ratio);
+  }
+}
+
+function applyPreset(idx, btnEl) {
+  clearActiveButtons();
+  btnEl.classList.add('active');
   currentPreset = PRESETS[idx];
   document.getElementById('selectedLabel').textContent = currentPreset.label;
-  updateDimsLabel(currentPreset.w, currentPreset.h);
-
   document.getElementById('customW').value = currentPreset.w;
   document.getElementById('customH').value = currentPreset.h;
-
+  updateDimsLabel(currentPreset.w, currentPreset.h);
   setCropperAspect(currentPreset.w, currentPreset.h);
 }
 
@@ -404,8 +394,7 @@ function applyCustomSize() {
   const w = parseInt(document.getElementById('customW').value);
   const h = parseInt(document.getElementById('customH').value);
   if (!w || !h || w < 1 || h < 1) return alert('請輸入有效的寬高');
-
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  clearActiveButtons();
   currentPreset = { label: `自訂 ${w}×${h}`, w, h, maxMB: null };
   document.getElementById('selectedLabel').textContent = currentPreset.label;
   updateDimsLabel(w, h);
@@ -425,7 +414,6 @@ function updateDimsLabel(w, h) {
 // ── Cropper controls ───────────────────────────────────────────────────────
 function rotateLeft()  { cropper && cropper.rotate(-90); }
 function rotateRight() { cropper && cropper.rotate(90); }
-let scaleXState = 1, scaleYState = 1;
 function flipX() { scaleXState *= -1; cropper && cropper.scaleX(scaleXState); }
 function flipY() { scaleYState *= -1; cropper && cropper.scaleY(scaleYState); }
 function resetCrop() {
@@ -440,33 +428,24 @@ function generatePreview() {
   if (!currentPreset) {
     const w = parseInt(document.getElementById('customW').value);
     const h = parseInt(document.getElementById('customH').value);
-    if (!w || !h) return alert('請先選擇尺寸或輸入自訂尺寸');
+    if (!w || !h) return alert('請先選擇右側尺寸');
     currentPreset = { label: `自訂 ${w}×${h}`, w, h, maxMB: null };
   }
-
   const canvas = cropper.getCroppedCanvas({ width: currentPreset.w, height: currentPreset.h, imageSmoothingQuality: 'high' });
   const mime = outputFormat === 'png' ? 'image/png' : outputFormat === 'webp' ? 'image/webp' : 'image/jpeg';
   previewDataURL = canvas.toDataURL(mime, outputQuality);
 
-  // Show preview
-  const box = document.getElementById('previewBox');
-  box.innerHTML = `<img src="${previewDataURL}" style="max-width:100%;max-height:150px;object-fit:contain">`;
+  document.getElementById('previewBox').innerHTML = `<img src="${previewDataURL}" style="max-width:100%;max-height:140px;object-fit:contain">`;
 
-  // File size estimate
   const bytes = Math.round((previewDataURL.length - `data:${mime};base64,`.length) * 0.75);
-  const kb = (bytes / 1024).toFixed(0);
-  const mb = (bytes / 1024 / 1024).toFixed(2);
-
-  let warn = '';
-  if (currentPreset.maxMB && bytes > currentPreset.maxMB * 1024 * 1024) {
-    warn = `<span class="warn">⚠ 超過 ${currentPreset.maxMB}MB 限制，建議降低品質或選 JPG</span>`;
-  }
+  const sizeStr = bytes < 1024 * 1024 ? (bytes / 1024).toFixed(0) + ' KB' : (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  const warn = currentPreset.maxMB && bytes > currentPreset.maxMB * 1024 * 1024
+    ? `<span class="warn">⚠ 超過 ${currentPreset.maxMB}MB 限制，建議降低品質或選 JPG</span>` : '';
 
   document.getElementById('fileInfo').innerHTML = `
     <span>尺寸：${currentPreset.w} × ${currentPreset.h} px</span>
-    <span>大小：約 ${kb < 1024 ? kb + ' KB' : mb + ' MB'}</span>
-    <span>格式：${outputFormat.toUpperCase()}</span>
-    ${warn}`;
+    <span>大小：約 ${sizeStr}</span>
+    <span>格式：${outputFormat.toUpperCase()}</span>${warn}`;
 }
 
 function downloadImage() {
@@ -497,18 +476,17 @@ function updateQuality(el) {
 // ── Reset ──────────────────────────────────────────────────────────────────
 function resetAll() {
   if (cropper) { cropper.destroy(); cropper = null; }
-  currentPreset = null; previewDataURL = null;
+  currentPreset = null; previewDataURL = null; scaleXState = 1; scaleYState = 1;
   document.getElementById('cropImage').src = '';
   document.getElementById('fileInput').value = '';
-  document.getElementById('editor').classList.remove('visible');
+  document.getElementById('cropPanel').classList.remove('visible');
   document.getElementById('uploadZone').style.display = '';
   document.getElementById('headerControls').classList.remove('visible');
-  document.getElementById('selectedLabel').textContent = '請選擇尺寸';
+  document.getElementById('selectedLabel').textContent = '請選擇右側尺寸';
   document.getElementById('cropDims').textContent = '—';
   document.getElementById('previewBox').innerHTML = '<span style="color:#ccc;font-size:13px">套用裁切後顯示</span>';
   document.getElementById('fileInfo').innerHTML = '';
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  scaleXState = 1; scaleYState = 1;
+  clearActiveButtons();
 }
 </script>
 </body>
