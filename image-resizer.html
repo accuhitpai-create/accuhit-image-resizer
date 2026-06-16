@@ -253,6 +253,12 @@
             <span>×</span>
             <input type="number" id="customH" placeholder="高 px" min="1">
           </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+            <label style="font-size:12px;color:#888;white-space:nowrap;">大小上限</label>
+            <input type="number" id="customMaxMB" placeholder="MB" min="0.1" step="0.1"
+              style="flex:1;padding:8px 10px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;text-align:center;">
+            <span style="font-size:12px;color:#888;">MB</span>
+          </div>
           <button class="btn btn-secondary apply-custom" onclick="applyCustomSize()">套用自訂</button>
         </div>
       </div>
@@ -281,15 +287,14 @@ const QUICK_PICKS = [
 ];
 
 const PRESETS = [
-  { label: '一番賞 背景圖',  w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
-  { label: '一番賞 封面圖',  w: 800,  h: 480,  tag: '遊戲模組', maxMB: 10 },
-  { label: '刮刮樂 素材',    w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
-  { label: '拉霸/轉盤 獎品', w: 400,  h: 300,  tag: '遊戲模組', maxMB: 1  },
-  { label: '簽到 活動圖片',  w: 800,  h: 400,  tag: '簽到模組', maxMB: 9  },
-  { label: '群發 進階圖片',  w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
-  { label: '群發 連續圖片',  w: 1040, h: 1040, tag: '群發訊息', maxMB: 10 },
-  { label: 'LINE 輪播圖文',  w: 1040, h: 1040, tag: '群發訊息', maxMB: 1  },
-  { label: '觸發卡片',       w: 1040, h: 780,  tag: '群發訊息', maxMB: 10 },
+  { label: '一番賞 背景圖',   w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
+  { label: '一番賞 封面圖',   w: 800,  h: 480,  tag: '遊戲模組', maxMB: 10 },
+  { label: '刮刮樂 素材',     w: 960,  h: 1680, tag: '遊戲模組', maxMB: 10 },
+  { label: '拉霸/轉盤 獎品',  w: 400,  h: 300,  tag: '遊戲模組', maxMB: 1  },
+  { label: '簽到 活動圖片',   w: 800,  h: 400,  tag: '簽到模組', maxMB: 9  },
+  { label: '圖文選單（大）',  w: 2500, h: 1686, tag: '圖文選單', maxMB: 10 },
+  { label: '圖文選單（小）',  w: 2500, h: 843,  tag: '圖文選單', maxMB: 10 },
+  { label: '票券圖片',        w: 400,  h: 300,  tag: '票券',     maxMB: 1, aspectW: 4, aspectH: 3 },
 ];
 
 let cropper = null;
@@ -388,6 +393,7 @@ function applyQuickPick(idx, btnEl) {
     currentPreset = { label: p.label, w: p.w, h: p.h, maxMB: null };
     document.getElementById('customW').value = p.w;
     document.getElementById('customH').value = p.h;
+    document.getElementById('customMaxMB').value = '';
     document.getElementById('selectedLabel').textContent = p.label;
     updateDimsLabel(p.w, p.h);
     setCropperAspect(p.w, p.h);
@@ -397,6 +403,7 @@ function applyQuickPick(idx, btnEl) {
     currentPreset = { label: p.label, w, h, maxMB: null };
     document.getElementById('customW').value = w;
     document.getElementById('customH').value = h;
+    document.getElementById('customMaxMB').value = '';
     document.getElementById('selectedLabel').textContent = `${p.label}（${w}×${h}）`;
     updateDimsLabel(w, h);
     if (cropper) cropper.setAspectRatio(ratio);
@@ -410,16 +417,22 @@ function applyPreset(idx, btnEl) {
   document.getElementById('selectedLabel').textContent = currentPreset.label;
   document.getElementById('customW').value = currentPreset.w;
   document.getElementById('customH').value = currentPreset.h;
+  document.getElementById('customMaxMB').value = currentPreset.maxMB ?? '';
   updateDimsLabel(currentPreset.w, currentPreset.h);
-  setCropperAspect(currentPreset.w, currentPreset.h);
+  if (currentPreset.aspectW && currentPreset.aspectH) {
+    if (cropper) cropper.setAspectRatio(currentPreset.aspectW / currentPreset.aspectH);
+  } else {
+    setCropperAspect(currentPreset.w, currentPreset.h);
+  }
 }
 
 function applyCustomSize() {
   const w = parseInt(document.getElementById('customW').value);
   const h = parseInt(document.getElementById('customH').value);
+  const mb = parseFloat(document.getElementById('customMaxMB').value) || null;
   if (!w || !h || w < 1 || h < 1) return alert('請輸入有效的寬高');
   clearActiveButtons();
-  currentPreset = { label: `自訂 ${w}×${h}`, w, h, maxMB: null };
+  currentPreset = { label: `自訂 ${w}×${h}`, w, h, maxMB: mb };
   document.getElementById('selectedLabel').textContent = currentPreset.label;
   updateDimsLabel(w, h);
   setCropperAspect(w, h);
