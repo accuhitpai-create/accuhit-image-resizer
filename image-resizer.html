@@ -137,6 +137,24 @@
   .btn-secondary:hover { background: #e0e0e8; }
   .btn-icon { padding: 8px 12px; font-size: 16px; }
 
+  /* Custom bar (above crop panel) */
+  .custom-bar { display: none; margin-bottom: 8px; }
+  .custom-bar.visible { display: block; }
+  .custom-bar-inner {
+    background: #fff; border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .custom-bar-size { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  .custom-bar-size input { width: 0; flex: 1; min-width: 0; padding: 7px 8px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-size: 13px; text-align: center; }
+  .custom-bar-size input:focus { outline: none; border-color: #0071e3; }
+  .custom-bar-size span { color: #888; font-size: 13px; flex-shrink: 0; }
+  .custom-bar-sep { font-size: 12px; color: #bbb; }
+  .custom-bar-mb { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .custom-bar-mb label { font-size: 12px; color: #888; white-space: nowrap; }
+  .custom-bar-mb input { width: 58px; padding: 7px 6px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-size: 13px; text-align: center; }
+  .custom-bar-mb input:focus { outline: none; border-color: #0071e3; }
+  .custom-bar-mb span { font-size: 12px; color: #888; }
+
   /* Rotate row */
   .rotate-row {
     padding: 10px 18px; border-top: 1px solid #f0f0f0;
@@ -216,6 +234,24 @@
         </div>
       </div>
 
+      <!-- Custom size bar (shown with crop panel) -->
+      <div class="custom-bar" id="customBar">
+        <div class="custom-bar-inner">
+          <div class="custom-bar-size">
+            <input type="number" id="customW" placeholder="寬 px" min="1">
+            <span>×</span>
+            <input type="number" id="customH" placeholder="高 px" min="1">
+            <span class="custom-bar-sep">px</span>
+          </div>
+          <div class="custom-bar-mb">
+            <label>上限</label>
+            <input type="number" id="customMaxMB" placeholder="不限" min="0.1" step="0.1">
+            <span>MB</span>
+          </div>
+          <button class="btn btn-secondary" onclick="applyCustomSize()" style="white-space:nowrap;flex-shrink:0">套用</button>
+        </div>
+      </div>
+
       <!-- Crop panel (after upload) -->
       <div class="crop-panel" id="cropPanel">
         <div class="crop-header">
@@ -260,20 +296,6 @@
         <h3>常用尺寸</h3>
         <div class="quick-picks" id="quickPicks"></div>
         <div class="preset-list" id="presetList"></div>
-        <div style="margin-top:12px; padding-top:12px; border-top:1px solid #f0f0f0;">
-          <div style="font-size:12px;color:#888;margin-bottom:6px;">自訂尺寸</div>
-          <div class="custom-size">
-            <input type="number" id="customW" placeholder="寬 px" min="1">
-            <span>×</span>
-            <input type="number" id="customH" placeholder="高 px" min="1">
-          </div>
-          <div class="maxmb-row">
-            <label>大小上限</label>
-            <input type="number" id="customMaxMB" placeholder="不限" min="0.1" step="0.1">
-            <span>MB</span>
-          </div>
-          <button class="btn btn-secondary apply-custom" onclick="applyCustomSize()">套用自訂</button>
-        </div>
       </div>
 
 
@@ -362,6 +384,7 @@ function loadFile(file) {
   const url = URL.createObjectURL(file);
 
   document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('customBar').classList.add('visible');
   document.getElementById('cropPanel').classList.add('visible');
   document.getElementById('headerControls').classList.add('visible');
 
@@ -547,6 +570,7 @@ function resetAll() {
   document.getElementById('rotateVal').textContent = '0°';
   document.getElementById('cropImage').src = '';
   document.getElementById('fileInput').value = '';
+  document.getElementById('customBar').classList.remove('visible');
   document.getElementById('cropPanel').classList.remove('visible');
   document.getElementById('uploadZone').style.display = '';
   document.getElementById('headerControls').classList.remove('visible');
