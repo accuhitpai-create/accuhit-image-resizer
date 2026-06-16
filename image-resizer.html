@@ -241,6 +241,15 @@
     <!-- Right: always visible -->
     <div class="side-panel">
 
+      <!-- Output preview (hidden until crop applied) -->
+      <div class="card" id="previewCard" style="display:none">
+        <h3>輸出預覽</h3>
+        <div class="preview-box" id="previewBox">
+          <span style="color:#ccc;font-size:13px">套用裁切後顯示</span>
+        </div>
+        <div class="file-info" id="fileInfo"></div>
+      </div>
+
       <!-- Size presets -->
       <div class="card">
         <h3>常用尺寸</h3>
@@ -263,14 +272,6 @@
         </div>
       </div>
 
-      <!-- Output preview -->
-      <div class="card">
-        <h3>輸出預覽</h3>
-        <div class="preview-box" id="previewBox">
-          <span style="color:#ccc;font-size:13px">套用裁切後顯示</span>
-        </div>
-        <div class="file-info" id="fileInfo"></div>
-      </div>
 
     </div>
   </div>
@@ -494,6 +495,7 @@ function generatePreview() {
   const mime = outputFormat === 'png' ? 'image/png' : outputFormat === 'webp' ? 'image/webp' : 'image/jpeg';
   previewDataURL = canvas.toDataURL(mime, outputQuality);
 
+  document.getElementById('previewCard').style.display = '';
   document.getElementById('previewBox').innerHTML = `<img src="${previewDataURL}" style="max-width:100%;max-height:140px;object-fit:contain">`;
 
   const bytes = Math.round((previewDataURL.length - `data:${mime};base64,`.length) * 0.75);
@@ -523,6 +525,7 @@ function selectFormat(el) {
   outputFormat = el.dataset.fmt;
   document.getElementById('hdrQualityRow').style.display = outputFormat === 'png' ? 'none' : 'flex';
   previewDataURL = null;
+  document.getElementById('previewCard').style.display = 'none';
   document.getElementById('previewBox').innerHTML = '<span style="color:#ccc;font-size:13px">套用裁切後顯示</span>';
   document.getElementById('fileInfo').innerHTML = '';
 }
@@ -545,6 +548,7 @@ function resetAll() {
   document.getElementById('headerControls').classList.remove('visible');
   document.getElementById('selectedLabel').textContent = '請選擇右側尺寸';
   document.getElementById('cropDims').textContent = '—';
+  document.getElementById('previewCard').style.display = 'none';
   document.getElementById('previewBox').innerHTML = '<span style="color:#ccc;font-size:13px">套用裁切後顯示</span>';
   document.getElementById('fileInfo').innerHTML = '';
   clearActiveButtons();
