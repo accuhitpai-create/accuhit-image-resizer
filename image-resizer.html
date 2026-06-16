@@ -273,7 +273,6 @@
           <button class="btn btn-secondary btn-icon" title="水平翻轉" onclick="flipX()">⇄</button>
           <button class="btn btn-secondary btn-icon" title="垂直翻轉" onclick="flipY()">⇅</button>
           <button class="btn btn-secondary" onclick="resetCrop()">重置全部</button>
-          <button class="btn btn-primary" onclick="generatePreview()" style="margin-left:auto">套用裁切 →</button>
         </div>
       </div>
 
@@ -281,6 +280,9 @@
 
     <!-- Right: always visible -->
     <div class="side-panel">
+
+      <!-- Apply button -->
+      <button class="btn btn-primary" id="applyBtn" onclick="generatePreview()" style="display:none;width:100%;padding:12px;font-size:14px;border-radius:12px;">套用裁切 →</button>
 
       <!-- Output preview (hidden until crop applied) -->
       <div class="card" id="previewCard" style="display:none">
@@ -386,6 +388,7 @@ function loadFile(file) {
   document.getElementById('uploadZone').style.display = 'none';
   document.getElementById('customBar').classList.add('visible');
   document.getElementById('cropPanel').classList.add('visible');
+  document.getElementById('applyBtn').style.display = '';
   document.getElementById('headerControls').classList.add('visible');
 
   if (cropper) { cropper.destroy(); cropper = null; }
@@ -572,6 +575,7 @@ function resetAll() {
   document.getElementById('fileInput').value = '';
   document.getElementById('customBar').classList.remove('visible');
   document.getElementById('cropPanel').classList.remove('visible');
+  document.getElementById('applyBtn').style.display = 'none';
   document.getElementById('uploadZone').style.display = '';
   document.getElementById('headerControls').classList.remove('visible');
   document.getElementById('selectedLabel').textContent = '請選擇右側尺寸';
