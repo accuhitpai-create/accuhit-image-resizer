@@ -132,6 +132,24 @@
   .btn-secondary:hover { background: #e0e0e8; }
   .btn-icon { padding: 8px 12px; font-size: 16px; }
 
+  /* Rotate row */
+  .rotate-row {
+    padding: 10px 18px; border-top: 1px solid #f0f0f0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .rotate-row label { font-size: 12px; color: #888; white-space: nowrap; flex-shrink: 0; }
+  .rotate-row input[type=range] { flex: 1; accent-color: #0071e3; cursor: pointer; }
+  .rotate-val {
+    font-size: 12px; font-weight: 600; color: #0071e3;
+    min-width: 38px; text-align: right; white-space: nowrap;
+  }
+  .rotate-reset {
+    padding: 4px 10px; border-radius: 6px; border: 1.5px solid #e8e8e8;
+    font-size: 11px; font-weight: 600; cursor: pointer; background: #fff;
+    color: #666; white-space: nowrap; transition: all .15s; flex-shrink: 0;
+  }
+  .rotate-reset:hover { border-color: #0071e3; color: #0071e3; }
+
   /* Output preview */
   .preview-box {
     background: #f5f5f7; border-radius: 10px; overflow: hidden;
@@ -202,12 +220,18 @@
         <div class="crop-canvas" id="cropCanvas">
           <img id="cropImage" src="" alt="">
         </div>
+        <div class="rotate-row">
+          <label>旋轉角度</label>
+          <input type="range" id="rotateSlider" min="-45" max="45" value="0" step="0.5" oninput="onRotateSlider(this)">
+          <span class="rotate-val" id="rotateVal">0°</span>
+          <button class="rotate-reset" onclick="resetRotation()">歸零</button>
+        </div>
         <div class="crop-actions">
-          <button class="btn btn-secondary btn-icon" title="向左旋轉" onclick="rotateLeft()">↺</button>
-          <button class="btn btn-secondary btn-icon" title="向右旋轉" onclick="rotateRight()">↻</button>
+          <button class="btn btn-secondary btn-icon" title="向左旋轉90°" onclick="rotateLeft()">↺</button>
+          <button class="btn btn-secondary btn-icon" title="向右旋轉90°" onclick="rotateRight()">↻</button>
           <button class="btn btn-secondary btn-icon" title="水平翻轉" onclick="flipX()">⇄</button>
           <button class="btn btn-secondary btn-icon" title="垂直翻轉" onclick="flipY()">⇅</button>
-          <button class="btn btn-secondary" onclick="resetCrop()">重置裁切</button>
+          <button class="btn btn-secondary" onclick="resetCrop()">重置全部</button>
           <button class="btn btn-primary" onclick="generatePreview()" style="margin-left:auto">套用裁切 →</button>
         </div>
       </div>
@@ -412,12 +436,34 @@ function updateDimsLabel(w, h) {
 }
 
 // ── Cropper controls ───────────────────────────────────────────────────────
-function rotateLeft()  { cropper && cropper.rotate(-90); }
-function rotateRight() { cropper && cropper.rotate(90); }
+let currentAngle = 0;
+
+function rotateLeft()  { setAngle(currentAngle - 90); }
+function rotateRight() { setAngle(currentAngle + 90); }
 function flipX() { scaleXState *= -1; cropper && cropper.scaleX(scaleXState); }
 function flipY() { scaleYState *= -1; cropper && cropper.scaleY(scaleYState); }
+
+function onRotateSlider(el) {
+  setAngle(parseFloat(el.value));
+}
+
+function setAngle(deg) {
+  if (!cropper) return;
+  currentAngle = deg;
+  cropper.rotateTo(deg);
+  document.getElementById('rotateSlider').value = Math.max(-45, Math.min(45, deg));
+  document.getElementById('rotateVal').textContent = (deg >= 0 ? '+' : '') + deg.toFixed(1).replace('.0', '') + '°';
+}
+
+function resetRotation() {
+  setAngle(0);
+}
+
 function resetCrop() {
   scaleXState = 1; scaleYState = 1;
+  currentAngle = 0;
+  document.getElementById('rotateSlider').value = 0;
+  document.getElementById('rotateVal').textContent = '0°';
   cropper && cropper.reset();
   if (currentPreset) setCropperAspect(currentPreset.w, currentPreset.h);
 }
@@ -476,7 +522,9 @@ function updateQuality(el) {
 // ── Reset ──────────────────────────────────────────────────────────────────
 function resetAll() {
   if (cropper) { cropper.destroy(); cropper = null; }
-  currentPreset = null; previewDataURL = null; scaleXState = 1; scaleYState = 1;
+  currentPreset = null; previewDataURL = null; scaleXState = 1; scaleYState = 1; currentAngle = 0;
+  document.getElementById('rotateSlider').value = 0;
+  document.getElementById('rotateVal').textContent = '0°';
   document.getElementById('cropImage').src = '';
   document.getElementById('fileInput').value = '';
   document.getElementById('cropPanel').classList.remove('visible');
