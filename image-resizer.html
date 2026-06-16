@@ -118,11 +118,16 @@
   .preset-btn.active .tag { background: #0071e3; color: #fff; }
 
   /* Custom size */
-  .custom-size { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-  .custom-size input { flex: 1; padding: 8px 10px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-size: 13px; text-align: center; }
+  .custom-size { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+  .custom-size input { flex: 1; min-width: 0; padding: 8px 6px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-size: 13px; text-align: center; }
   .custom-size input:focus { outline: none; border-color: #0071e3; }
-  .custom-size span { color: #888; font-size: 14px; }
+  .custom-size span { color: #888; font-size: 14px; flex-shrink: 0; }
   .apply-custom { width: 100%; margin-top: 8px; }
+  .maxmb-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .maxmb-row label { font-size: 12px; color: #888; white-space: nowrap; flex-shrink: 0; }
+  .maxmb-row input { flex: 1; min-width: 0; padding: 8px 6px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-size: 13px; text-align: center; }
+  .maxmb-row input:focus { outline: none; border-color: #0071e3; }
+  .maxmb-row span { font-size: 12px; color: #888; flex-shrink: 0; }
 
   /* Buttons */
   .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all .15s; }
@@ -262,11 +267,10 @@
             <span>×</span>
             <input type="number" id="customH" placeholder="高 px" min="1">
           </div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-            <label style="font-size:12px;color:#888;white-space:nowrap;">大小上限</label>
-            <input type="number" id="customMaxMB" placeholder="MB" min="0.1" step="0.1"
-              style="flex:1;padding:8px 10px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;text-align:center;">
-            <span style="font-size:12px;color:#888;">MB</span>
+          <div class="maxmb-row">
+            <label>大小上限</label>
+            <input type="number" id="customMaxMB" placeholder="不限" min="0.1" step="0.1">
+            <span>MB</span>
           </div>
           <button class="btn btn-secondary apply-custom" onclick="applyCustomSize()">套用自訂</button>
         </div>
